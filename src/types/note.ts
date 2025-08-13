@@ -11,3 +11,5 @@ export interface Note {
 	updatedAt?: string
 	tag: string
 }
+
+export type NoteId = Note["id"]

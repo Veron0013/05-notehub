@@ -1,33 +1,44 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import css from "./App.module.css"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import type { Note, NotesData } from "../../types/note"
+import type { NoteId, NotesData } from "../../types/note"
 import NoteList from "../NoteList/NoteList"
 import SearchBox from "../SearchBox/SearchBox"
 import Pagination from "../Pagination/Pagination"
 import Modal from "../Modal/Modal"
 import Loader from "../Loader/Loader"
 import ErrorMessage from "../ErrorMessage/ErrorMessage"
+import { createQueryParams, fetchNotes } from "../../services/noteService"
+import toastMessage, { MyToastType } from "../../services/messageService"
+import { useDebouncedCallback } from "use-debounce"
 
 function App() {
-	const [count, setCount] = useState(0)
-	const [notehubQuery, setStorageQuery] = useState("")
+	const [notehubQuery, setNoteHubQuery] = useState("")
 	const [currentPage, setCurrentPage] = useState<number>(1)
 	const [totalPages, setTotalPages] = useState<number>(0)
 
-	const [noteObject, setNoteObject] = useState(0)
+	const [noteid, setNoteObject] = useState<NoteId>(0)
 	const [isModalOpen, setIsModalOpen] = useState(false)
 
 	const { data, isLoading, isError } = useQuery({
-		queryKey: ["searchQuery"],
+		queryKey: ["notesQuery", notehubQuery, currentPage],
 		queryFn: async () => fetchQueryData(),
 		placeholderData: keepPreviousData,
-		enabled: notehubQuery !== "",
 	})
 
 	const fetchQueryData = async () => {
-		setTotalPages(20)
+		const res: NotesData = await fetchNotes(createQueryParams(notehubQuery, currentPage))
+		if (!res.notes.length) {
+			toastMessage(MyToastType.error, "translationTexts.toast_bad_request")
+		}
+		setTotalPages(res.totalPages)
+		return res
 	}
+
+	const debouncedQueryChange = useDebouncedCallback((value: string) => {
+		setNoteHubQuery(value)
+		setCurrentPage(1)
+	}, 450)
 
 	const handleCreateNote = () => {
 		setIsModalOpen(true)
@@ -49,7 +60,7 @@ function App() {
 	return (
 		<div className={css.app}>
 			<header className={css.toolbar}>
-				<SearchBox />
+				<SearchBox onQueryChange={debouncedQueryChange} />
 				{totalPages > 0 && (
 					<Pagination
 						currentPage={currentPage}

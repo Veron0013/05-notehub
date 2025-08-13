@@ -1,14 +1,36 @@
-import type { Note } from "../../types/note"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import type { Note, NoteId } from "../../types/note"
 import css from "./NoteList.module.css"
+import { deleteNote } from "../../services/noteService"
+import toastMessage, { MyToastType } from "../../services/messageService"
 
 interface NoteListProps {
-	onSelect: (noteSelected: number) => void
+	onSelect: (noteSelected: NoteId) => void
 	notes: Note[]
 }
 
 export default function NoteList({ notes, onSelect }: NoteListProps) {
+	const queryClient = useQueryClient()
+
+	const { mutate: deleteMutation } = useMutation<Note, Error, string>({
+		mutationFn: deleteNote,
+		onSuccess(note) {
+			console.log("deleted")
+			toastMessage(MyToastType.success, `Note ${note.title} deleted`)
+			queryClient.invalidateQueries({ queryKey: ["notesQuery"] })
+		},
+		onError() {
+			console.log("Error deleting task!!!!")
+		},
+	})
+
 	const handleClick = (e: React.MouseEvent<HTMLLIElement>) => {
-		const noteSelected: number = Number(e.currentTarget.id)
+		const noteSelected: NoteId = e.currentTarget.id as NoteId
+		console.log(noteSelected, e.target, e.currentTarget.id)
+		const isConfirmed = window.confirm("А ви впевнені, що хочете видалити?")
+		if (isConfirmed) {
+			console.log("deleted")
+		}
 		return onSelect(noteSelected)
 	}
 
@@ -16,7 +38,6 @@ export default function NoteList({ notes, onSelect }: NoteListProps) {
 		<div>
 			<ul className={css.list}>
 				{notes.map((item: Note, index: number) => {
-					//console.log(item)
 					return (
 						<li
 							key={item.id}
@@ -29,7 +50,9 @@ export default function NoteList({ notes, onSelect }: NoteListProps) {
 							<p className={css.content}>{item.content}</p>
 							<div className={css.footer}>
 								<span className={css.tag}>{item.tag}</span>
-								<button className={css.button}>Delete</button>
+								<button className={css.button} onClick={() => deleteMutation(item.id)}>
+									Delete
+								</button>
 							</div>
 						</li>
 					)
