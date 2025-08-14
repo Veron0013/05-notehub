@@ -27,7 +27,7 @@ export default function SearchBox({ onQueryChange }: SearchBoxProps) {
 			<input className={css.input} type="text" placeholder="Search notes" value={inputValue} onChange={handleChange} />
 			{inputValue.length > 0 && (
 				<button type="button" onClick={handleClear} className={css.clear}>
-					×
+					x
 				</button>
 			)}
 		</div>

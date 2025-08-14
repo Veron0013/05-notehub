@@ -1,16 +1,16 @@
 import axios from "axios"
 import { MAIN_URL, PER_PAGE } from "./vars"
-import type { Note, NoteId, NotePost } from "../types/note"
+import type { Note, NoteId, NotePost, NotesData, SortBy, Tag } from "../types/note"
 
 axios.defaults.baseURL = MAIN_URL
 axios.defaults.headers.common["Authorization"] = `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`
 
 export interface SearchParams {
 	search: string
-	tag?: string
+	tag?: Tag
 	page?: number
 	perPage?: number
-	sortBy?: string
+	sortBy?: SortBy
 }
 
 interface ApiQueryParams {
@@ -25,12 +25,14 @@ export const createQueryParams = (search = "", page = 1): ApiQueryParams => ({
 	},
 })
 
-export const fetchNotes = async <NotesData>(
-	queryParams: ApiQueryParams,
-	id: NoteId | null = null
-): Promise<NotesData> => {
-	const url: string = id === null ? MAIN_URL : `${MAIN_URL}/${id}`
-	const response = await axios.get<NotesData>(url, queryParams)
+export const fetchNotes = async (queryParams: ApiQueryParams): Promise<NotesData> => {
+	//const url: string = id === null ? MAIN_URL : `${MAIN_URL}/${id}`
+	const response = await axios.get<NotesData>(MAIN_URL, queryParams)
+	return response.data
+}
+
+export const deleteNote = async (id: NoteId): Promise<Note> => {
+	const response = await axios.delete<Note>(`${MAIN_URL}/${id}`)
 	return response.data
 }
 
@@ -42,10 +44,5 @@ export const createNote = async (queryParams: NotePost): Promise<Note> => {
 
 export const updateNote = async (queryParams: NotePost, id: NoteId): Promise<Note> => {
 	const response = await axios.patch<Note>(`${MAIN_URL}/${id}`, queryParams)
-	return response.data
-}
-
-export const deleteNote = async (id: NoteId): Promise<Note> => {
-	const response = await axios.delete<Note>(`${MAIN_URL}/${id}`)
 	return response.data
 }

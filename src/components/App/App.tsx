@@ -11,20 +11,15 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage"
 import { createQueryParams, fetchNotes } from "../../services/noteService"
 import toastMessage, { MyToastType } from "../../services/messageService"
 import { useDebouncedCallback } from "use-debounce"
+import NoteForm from "../NoteForm/NoteForm"
 
 function App() {
 	const [notehubQuery, setNoteHubQuery] = useState("")
 	const [currentPage, setCurrentPage] = useState<number>(1)
-	const [totalPages, setTotalPages] = useState<number>(0)
+	const [total_pages, setTotalPages] = useState<number>(0)
 
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [noteObject, setNoteObject] = useState<Note | null>(null)
-
-	const { data, isLoading, isError } = useQuery({
-		queryKey: ["notesQuery", notehubQuery, currentPage],
-		queryFn: async () => fetchQueryData(),
-		placeholderData: keepPreviousData,
-	})
 
 	const fetchQueryData = async () => {
 		const res: NotesData = await fetchNotes(createQueryParams(notehubQuery, currentPage))
@@ -34,6 +29,12 @@ function App() {
 		setTotalPages(res.totalPages)
 		return res
 	}
+
+	const { data, isLoading, isError } = useQuery({
+		queryKey: ["notesQuery", notehubQuery, currentPage],
+		queryFn: async () => fetchQueryData(),
+		placeholderData: keepPreviousData,
+	})
 
 	const debouncedQueryChange = useDebouncedCallback((value: string) => {
 		setNoteHubQuery(value)
@@ -57,10 +58,10 @@ function App() {
 		<div className={css.app}>
 			<header className={css.toolbar}>
 				<SearchBox onQueryChange={debouncedQueryChange} />
-				{totalPages > 0 && (
+				{total_pages > 1 && (
 					<Pagination
 						currentPage={currentPage}
-						total_pages={totalPages}
+						total_pages={total_pages}
 						setCurrentPage={(newPage: number) => {
 							setCurrentPage(newPage)
 						}}
@@ -73,7 +74,11 @@ function App() {
 			{isError && <ErrorMessage />}
 			{isLoading && <Loader />}
 			{data && data?.notes?.length > 0 && <NoteList notes={data.notes} onSelect={handleNoteClick} />}
-			{isModalOpen && <Modal onClose={closeModal} noteObject={noteObject} />}
+			{isModalOpen && (
+				<Modal onClose={closeModal}>
+					<NoteForm onClose={closeModal} noteObject={noteObject} />
+				</Modal>
+			)}
 		</div>
 	)
 }

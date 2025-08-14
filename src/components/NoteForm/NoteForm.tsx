@@ -5,7 +5,7 @@ import * as Yup from "yup"
 import toastMessage, { MyToastType } from "../../services/messageService"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createNote, updateNote } from "../../services/noteService"
-import type { Note, NotePost } from "../../types/note"
+import type { Note, NotePost, Tag } from "../../types/note"
 
 interface NoteFormProps {
 	noteObject: Note | null
@@ -23,7 +23,7 @@ export default function NoteForm({ noteObject, onClose }: NoteFormProps) {
 	interface NotesFormValues {
 		title: string
 		content: string
-		tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping" | ""
+		tag: Tag
 	}
 
 	const initialValues: NotesFormValues = {
@@ -48,9 +48,9 @@ export default function NoteForm({ noteObject, onClose }: NoteFormProps) {
 	const { mutate, isPending } = useMutation({
 		mutationFn: saveNote,
 		onSuccess() {
+			onClose()
 			toastMessage(MyToastType.success, `Note successfully ${status.toastText}`)
 			queryClient.invalidateQueries({ queryKey: ["notesQuery"] })
-			onClose()
 		},
 		onError(error) {
 			toastMessage(MyToastType.error, `Note not ${status.toastText}. Error found.${error.message} `)

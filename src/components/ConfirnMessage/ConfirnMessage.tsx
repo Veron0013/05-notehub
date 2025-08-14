@@ -34,12 +34,12 @@ export default function ConfirmMessage({ confirmPosition, onConfirm, onCancel }:
 			document.body.style.overflow = ""
 		}
 	}, [onCancel])
+
 	return createPortal(
 		<div className={css.backdrop} onClick={handleBackdropClick}>
 			<div
 				className={css.confirmWrapper}
 				style={{
-					position: "absolute",
 					top: confirmPosition.top,
 					left: confirmPosition.left,
 					width: confirmPosition.width,

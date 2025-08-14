@@ -73,20 +73,22 @@ export default function NoteList({ notes, onSelect }: NoteListProps) {
 									</button>
 								</div>
 							</div>
-							{showConfirm && (
-								<ConfirmMessage
-									confirmPosition={confirmPosition!}
-									onConfirm={() => {
-										deleteMutation(noteSelectedId!)
-										setShowConfirm(false)
-									}}
-									onCancel={() => setShowConfirm(false)}
-								/>
-							)}
 						</li>
 					)
 				})}
 			</ul>
+			{showConfirm && (
+				<ConfirmMessage
+					confirmPosition={confirmPosition!}
+					onConfirm={() => {
+						if (noteSelectedId) {
+							deleteMutation(noteSelectedId!)
+							setShowConfirm(false)
+						}
+					}}
+					onCancel={() => setShowConfirm(false)}
+				/>
+			)}
 		</div>
 	)
 }
