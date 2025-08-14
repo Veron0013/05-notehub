@@ -23,7 +23,7 @@ export default function NoteList({ notes, onSelect }: NoteListProps) {
 			toastMessage(MyToastType.success, `Note ${note.title} deleted`)
 			queryClient.invalidateQueries({ queryKey: ["notesQuery"] })
 		},
-		onError(error) {
+		onError(error: Error) {
 			toastMessage(MyToastType.error, `Note not deleted. Error found.${error.message} `)
 		},
 	})
