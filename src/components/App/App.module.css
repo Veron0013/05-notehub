@@ -6,6 +6,9 @@
 }
 
 .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
@@ -13,7 +16,6 @@
   padding: 16px;
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
-  height: 70px;
   box-sizing: border-box;
 }
 

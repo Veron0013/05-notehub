@@ -38,6 +38,13 @@
 	overflow: hidden;
 }
 
+.buttonsWrapper {
+	margin: 0;
+	padding: 0;
+	display: flex;
+	gap: 12px;
+}
+
 .button {
 	align-self: flex-end;
 	padding: 6px 12px;

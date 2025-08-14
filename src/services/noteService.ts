@@ -1,6 +1,6 @@
 import axios from "axios"
 import { MAIN_URL, PER_PAGE } from "./vars"
-import type { Note, NoteId } from "../types/note"
+import type { Note, NoteId, NotePost } from "../types/note"
 
 axios.defaults.baseURL = MAIN_URL
 axios.defaults.headers.common["Authorization"] = `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`
@@ -17,18 +17,13 @@ interface ApiQueryParams {
 	params: SearchParams
 }
 
-export const createQueryParams = (search: string | null = null, page: number | null = null): ApiQueryParams => {
-	if (search === null || page === null) {
-		return { params: { search: "" } }
-	}
-	return {
-		params: {
-			search,
-			page,
-			perPage: PER_PAGE,
-		},
-	}
-}
+export const createQueryParams = (search = "", page = 1): ApiQueryParams => ({
+	params: {
+		search,
+		page,
+		perPage: PER_PAGE,
+	},
+})
 
 export const fetchNotes = async <NotesData>(
 	queryParams: ApiQueryParams,
@@ -39,10 +34,14 @@ export const fetchNotes = async <NotesData>(
 	return response.data
 }
 
-export const createNote = async (queryParams: ApiQueryParams, id: NoteId | null = null): Promise<Note> => {
-	const url: string = id === null ? MAIN_URL : `${MAIN_URL}/${id}`
-	const response = await axios.post<Note>(url, queryParams)
-	console.log(response.data)
+export const createNote = async (queryParams: NotePost): Promise<Note> => {
+	//console.log("creation", queryParams)
+	const response = await axios.post<Note>(MAIN_URL, queryParams)
+	return response.data
+}
+
+export const updateNote = async (queryParams: NotePost, id: NoteId): Promise<Note> => {
+	const response = await axios.patch<Note>(`${MAIN_URL}/${id}`, queryParams)
 	return response.data
 }
 
