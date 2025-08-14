@@ -45,29 +45,42 @@ export default function NoteForm({ noteObject, onClose }: NoteFormProps) {
 		return await createNote(noteData) // POST
 	}
 
-	const { mutate, isPending } = useMutation({
-		mutationFn: saveNote,
-		onSuccess() {
-			onClose()
-			toastMessage(MyToastType.success, `Note successfully ${status.toastText}`)
-			queryClient.invalidateQueries({ queryKey: ["notesQuery"] })
-		},
-		onError(error) {
-			toastMessage(MyToastType.error, `Note not ${status.toastText}. Error found.${error.message} `)
-		},
-	})
+	const { mutate, isPending } = useMutation({ mutationFn: saveNote })
+
+	//	,
+	//	onSuccess() {
+	//		onClose()
+	//		toastMessage(MyToastType.success, `Note successfully ${status.toastText}`)
+	//		queryClient.invalidateQueries({ queryKey: ["notesQuery"] })
+	//	},
+	//	onError(error: AxiosError) {
+	//		toastMessage(MyToastType.error, `Note not ${status.toastText}. Error found.${error.message} `)
+	//	},
+	//})
 
 	const handleSubmit = async (values: NotesFormValues, formikHelpers: FormikHelpers<NotesFormValues>) => {
 		setStatus({
 			toastText: !noteObject ? "created" : "updated",
 			buttonText: !noteObject ? "Create" : "Update",
 		})
-		formikHelpers.resetForm()
+		//if (!noteObject) {
+		//	formikHelpers.resetForm()
+		//}
 		const noteData: NotePost = {
 			...values,
 		}
 
-		mutate(noteData)
+		mutate(noteData, {
+			onSuccess: () => {
+				if (!noteObject) formikHelpers.resetForm() // тільки для створення
+				onClose()
+				toastMessage(MyToastType.success, `Note successfully ${status.toastText}`)
+				queryClient.invalidateQueries({ queryKey: ["notesQuery"] })
+			},
+			onError: (error: Error) => {
+				toastMessage(MyToastType.error, `Note not ${status.toastText}. Error found.${error.message}`)
+			},
+		})
 	}
 	return (
 		<div>
